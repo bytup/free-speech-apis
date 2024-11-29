@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Voice to Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .controls button {
+            margin: 0 10px;
+        }
+
+        #transcript {
+            white-space: pre-wrap;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Real-Time Voice to Text</h1>
+    <div class="controls">
+        <button id="start-recording">Start Recording</button>
+        <button id="stop-recording" disabled>Stop Recording</button>
+    </div>
+    <div id="transcript"></div>
+    <div id="fallback" style="display: none;">
+        Sorry, your browser does not support the Web Speech API for real-time speech recognition.
+    </div>
+
+    <script>
+        const startRecordingBtn = document.getElementById('start-recording');
+        const stopRecordingBtn = document.getElementById('stop-recording');
+        const transcriptDiv = document.getElementById('transcript');
+        const fallbackDiv = document.getElementById('fallback');
+
+        let recognition;
+
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            startRecordingBtn.addEventListener('click', () => {
+                recognition.start();
+                startRecordingBtn.disabled = true;
+                stopRecordingBtn.disabled = false;
+            });
+
+            stopRecordingBtn.addEventListener('click', () => {
+                recognition.stop();
+                startRecordingBtn.disabled = false;
+                stopRecordingBtn.disabled = true;
+            });
+
+            recognition.addEventListener('result', (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                }
+                transcriptDiv.textContent = transcript;
+            });
+        } else {
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = true;
+            fallbackDiv.style.display = 'block';
+        }
+    </script>

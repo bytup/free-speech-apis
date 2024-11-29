@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice to Text</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .controls button {
+            margin: 0 10px;
+        }
+
+        #transcript {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Voice to Text</h1>
+    <div class="controls">
+        <button id="start-recording">Start Recording</button>
+        <button id="stop-recording" disabled>Stop Recording</button>
+        <button id="play-audio" disabled>Play Audio</button>
+    </div>
+    <audio id="audio-player" controls></audio>
+    <div id="transcript"></div>
+
+    <script>
+        const startRecordingBtn = document.getElementById('start-recording');
+        const stopRecordingBtn = document.getElementById('stop-recording');
+        const playAudioBtn = document.getElementById('play-audio');
+        const audioPlayer = document.getElementById('audio-player');
+        const transcriptDiv = document.getElementById('transcript');
+
+        let mediaRecorder;
+        let audioBlob;
+
+
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            startRecordingBtn.addEventListener('click', async () => {
+                // Your previous recording and transcription logic here
+                startRecordingBtn.addEventListener('click', async () => {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+
+                        startRecordingBtn.disabled = true;
+                        stopRecordingBtn.disabled = false;
+
+                        const chunks = [];
+                        mediaRecorder.addEventListener('dataavailable', (event) => {
+                            chunks.push(event.data);
+                        });
+
+                        mediaRecorder.addEventListener('stop', () => {
+                            audioBlob = new Blob(chunks, { type: 'audio/wav' });
+                            audioPlayer.src = URL.createObjectURL(audioBlob);
+                            playAudioBtn.disabled = false;
+
+                            const recognition = new webkitSpeechRecognition();
+                            recognition.continuous = true;
+                            recognition.interimResults = true;
+
+                            recognition.addEventListener('result', (event) => {
+                                let transcript = '';
+                                for (let i = event.resultIndex; i < event.results.length; i++) {
+                                    if (event.results[i].isFinal) {
+                                        transcript += event.results[i][0].transcript;
+                                    }
+                                }
+                                transcriptDiv.textContent = transcript;
+                            });
+
+                            recognition.start();
+                        });
+                    } catch (error) {
+                        console.error('Error accessing microphone:', error);
+                    }
+                });
+
+                stopRecordingBtn.addEventListener('click', () => {
+                    mediaRecorder.stop();
+                    startRecordingBtn.disabled = false;
+                    stopRecordingBtn.disabled = true;
+                });
+
+                playAudioBtn.addEventListener('click', () => {
+                    audioPlayer.play();
+                });
+            });
+        } else {
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = true;
+            playAudioBtn.disabled = true;
+            fallbackDiv.style.display = 'block';
+        }
+
+    </script>
