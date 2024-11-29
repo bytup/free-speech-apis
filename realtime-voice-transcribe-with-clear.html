@@ -4,45 +4,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Voice to Text</title>
+    <title>Bytup Voice Transcription</title>
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
         }
 
         h1 {
-            text-align: center;
+            font-size: 2rem;
+            color: var(--text-color);
+            margin: 0.5rem 0;
         }
 
         .controls {
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
 
-        .controls button {
-            margin: 0 10px;
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #start-recording {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #start-recording:hover {
+            background-color: var(--secondary-color);
+        }
+
+        #stop-recording {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        #stop-recording:hover {
+            background-color: #dc2626;
+        }
+
+        #clear-transcript {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        #clear-transcript:hover {
+            background-color: #d1d5db;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .transcript-container {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         #transcript {
             white-space: pre-wrap;
-            font-size: 18px;
+            font-size: 1.125rem;
+            line-height: 1.6;
+        }
+
+        #fallback {
+            text-align: center;
+            color: #ef4444;
+            padding: 1rem;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            background-color: #fee2e2;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
-    <h1>Real-Time Voice to Text</h1>
-    <div class="controls">
-        <button id="start-recording">Start Recording</button>
-        <button id="stop-recording" disabled>Stop Recording</button>
-        <button id="clear-transcript" disabled>Clear Transcript</button>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Bytup</div>
+            <h1>Voice Transcription</h1>
+        </div>
+        <div class="controls">
+            <button id="start-recording">
+                <i class="fas fa-microphone"></i> Start Recording
+            </button>
+            <button id="stop-recording" disabled>
+                <i class="fas fa-stop"></i> Stop Recording
+            </button>
+            <button id="clear-transcript" disabled>
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+        <div class="transcript-container">
+            <div id="transcript"></div>
+        </div>
+        <div id="fallback" style="display: none;">
+            Sorry, your browser does not support the Web Speech API for real-time speech recognition.
+        </div>
     </div>
-    <div id="transcript"></div>
-    <div id="fallback" style="display: none;">
-        Sorry, your browser does not support the Web Speech API for real-time speech recognition.
-    </div>
+
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <script>
         const startRecordingBtn = document.getElementById('start-recording');
